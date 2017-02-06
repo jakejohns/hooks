@@ -1,0 +1,76 @@
+#!/bin/bash
+
+die() {
+    echo "$@" >&2
+    exit 1
+}
+
+init() {
+
+    if [ -f composer.json ]; then
+
+        echo "Dealing with composer"
+
+        # Detect composer binary
+        if which composer >/dev/null; then
+            composer='composer'
+        elif which composer.phar >/dev/null; then
+            composer='composer.phar'
+        else
+            # Install composer
+            echo "instaling composer"
+            curl -s http://getcomposer.org/installer | php >/dev/null
+            composer='php composer.phar'
+        fi
+
+        # Install or update packages specified lock file
+        $composer --no-ansi install
+
+    fi
+
+
+    if [ -f package.json ]; then
+        echo "Dealing with npm"
+        npm install
+    fi
+
+    if [ -f bower.json ]; then
+        echo "Dealing with bower"
+        bower install
+    fi
+
+    if [ -f gulpfile.js ]; then
+        echo "Dealing with gulp"
+        gulp
+    fi
+
+    if [[ -f phinx.yaml || -f phinx.php ]] ; then
+        echo "Dealing with phinx"
+        vendor/bin/phinx migrate
+    fi
+}
+
+deploy() {
+    local path=$1 branch=$2
+
+    echo "deploying $branch to $path ..."
+
+    GIT_WORK_TREE=${path} git checkout -f $branch
+
+    echo "Initialize application"
+
+    pushd ${path}
+
+    init
+
+    popd
+}
+
+while read oldrev newrev ref; do
+    case $ref in
+    refs/heads/master) deploy ../production master;;
+    refs/heads/develop) deploy ../staging develop;;
+    esac
+done
+
+
