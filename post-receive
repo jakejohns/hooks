@@ -7,6 +7,11 @@ die() {
 
 init() {
 
+    if [ -f .env ]; then
+        echo "Load ENV"
+        . .env
+    fi
+
     if [ -f composer.json ]; then
 
         echo "Dealing with composer"
@@ -44,9 +49,14 @@ init() {
         gulp
     fi
 
-    if [[ -f phinx.yaml || -f phinx.php ]] ; then
+    if [[ -f config/phinx.php ]] ; then
         echo "Dealing with phinx"
-        vendor/bin/phinx migrate
+        vendor/bin/phinx -c./config/phinx.php migrate
+    fi
+
+    if [[ -f bin/bootstrap-css ]] ; then
+        echo "Compiling CSS"
+        bin/bootstrap-css
     fi
 }
 
