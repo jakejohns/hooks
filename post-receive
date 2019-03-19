@@ -54,9 +54,9 @@ init() {
         vendor/bin/phinx -c./config/phinx.php migrate
     fi
 
-    if [[ -f bin/bootstrap-css ]] ; then
+    if [[ -f bin/compile-sass ]] ; then
         echo "Compiling CSS"
-        bin/bootstrap-css
+        bin/compile-sass
     fi
 }
 
