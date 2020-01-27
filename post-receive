@@ -9,24 +9,20 @@ init() {
 
     if [ -f .env ]; then
         echo "Load ENV"
+        # shellcheck disable=SC1091
         . .env
     fi
+
+    php=${php:-ea-php73}
 
     if [ -f composer.json ]; then
 
         echo "Dealing with composer"
 
-        # Detect composer binary
-        if which composer >/dev/null; then
-            composer='composer'
-        elif which composer.phar >/dev/null; then
-            composer='composer.phar'
-        else
-            # Install composer
-            echo "instaling composer"
-            curl -s http://getcomposer.org/installer | php >/dev/null
-            composer='php composer.phar'
-        fi
+        # Install composer
+        echo "instaling composer"
+        curl -s http://getcomposer.org/installer | "$php" >/dev/null
+        composer="$php composer.phar"
 
         # Install or update packages specified lock file
         $composer --no-ansi install
@@ -51,32 +47,31 @@ init() {
 
     if [[ -f config/phinx.php ]] ; then
         echo "Dealing with phinx"
-        vendor/bin/phinx -c./config/phinx.php migrate
+        "$php" vendor/bin/phinx -c./config/phinx.php migrate
     fi
 
-    if [[ -f bin/compile-sass ]] ; then
+    if [[ -f vendor/bin/bootstrap-css ]] ; then
         echo "Compiling CSS"
-        bin/compile-sass
+        "$php" vendor/bin/bootstrap-css
+    fi
+
+    if [[ -x bin/deploy ]] ; then
+        echo "Deploy script"
+        bin/deploy
     fi
 }
 
 deploy() {
     local path=$1 branch=$2
-
     echo "deploying $branch to $path ..."
-
-    GIT_WORK_TREE=${path} git checkout -f $branch
-
+    GIT_WORK_TREE=${path} git checkout -f "$branch"
     echo "Initialize application"
-
-    pushd ${path}
-
+    pushd "${path}" || exit 1
     init
-
-    popd
+    popd || exit 1
 }
 
-while read oldrev newrev ref; do
+while read -r _ _ ref; do
     case $ref in
     refs/heads/master) deploy ../production master;;
     refs/heads/develop) deploy ../staging develop;;
