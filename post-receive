@@ -29,22 +29,6 @@ init() {
 
     fi
 
-
-    if [ -f package.json ]; then
-        echo "Dealing with npm"
-        npm install
-    fi
-
-    if [ -f bower.json ]; then
-        echo "Dealing with bower"
-        bower install
-    fi
-
-    if [ -f gulpfile.js ]; then
-        echo "Dealing with gulp"
-        gulp
-    fi
-
     if [[ -f config/phinx.php ]] ; then
         echo "Dealing with phinx"
         "$php" vendor/bin/phinx -c./config/phinx.php migrate
@@ -52,7 +36,7 @@ init() {
 
     if [[ -f vendor/bin/bootstrap-css ]] ; then
         echo "Compiling CSS"
-        "$php" vendor/bin/bootstrap-css
+        "$php" vendor/bin/bootstrap-css compile
     fi
 
     if [[ -x bin/deploy ]] ; then
