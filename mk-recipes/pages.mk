@@ -1,8 +1,8 @@
 php ?= php
 
 resource_dir ?= resources
-views_dir	 ?= $(resource_dir)/views
-pages_dir 	 ?= $(views_dir)/pages
+views_dir    ?= $(resource_dir)/views
+pages_dir    ?= $(views_dir)/pages
 page_tpls    ?= $(wildcard $(pages_dir)/*.php)
 
 public_dir ?= public

@@ -2,13 +2,13 @@
 php ?= php
 
 resource_dir ?= resources
-style_dir 	 ?= $(resource_dir)/style
+style_dir    ?= $(resource_dir)/style
 style_src    ?= $(style_dir)/style.scss
 
-public_dir 	 ?= public
+public_dir   ?= public
 asset_dir    ?= $(public_dir)/assets
-css_dir		 ?= $(asset_dir)/css
-css   		 ?= $(css_dir)/style.css
+css_dir      ?= $(asset_dir)/css
+css          ?= $(css_dir)/style.css
 
 pscss    ?=vendor/bin/pscss
 pcss_opt ?= --style compressed
