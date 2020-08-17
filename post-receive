@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 die() {
     echo "$@" >&2
@@ -6,60 +6,34 @@ die() {
 }
 
 init() {
+    local env=$1
 
     if [ -f .env ]; then
-        echo "Load ENV"
+        echo "Loading .env file"
         # shellcheck disable=SC1091
-        . .env
+        source .env
     fi
 
-    php=${php:-ea-php73}
-
-    if [ -f composer.json ]; then
-
-        echo "Dealing with composer"
-
-        # Install composer
-        echo "instaling composer"
-        curl -s http://getcomposer.org/installer | "$php" >/dev/null
-        composer="$php composer.phar"
-
-        # Install or update packages specified lock file
-        $composer --no-ansi install
-
-    fi
-
-    if [[ -f config/phinx.php ]] ; then
-        echo "Dealing with phinx"
-        "$php" vendor/bin/phinx -c./config/phinx.php migrate
-    fi
-
-    if [[ -f vendor/bin/bootstrap-css ]] ; then
-        echo "Compiling CSS"
-        "$php" vendor/bin/bootstrap-css compile
-    fi
-
-    if [[ -x bin/deploy ]] ; then
-        echo "Deploy script"
-        bin/deploy
-    fi
+    make ENV="$env"
 }
 
 deploy() {
-    local path=$1 branch=$2
-    echo "deploying $branch to $path ..."
+    local branch=$1
+    local path=$2
+    local env=$3
+
+    printf "deploying %s to %s with env %s...\n" "$branch" "$path" "$env"
     GIT_WORK_TREE=${path} git checkout -f "$branch"
-    echo "Initialize application"
-    pushd "${path}" || exit 1
-    init
-    popd || exit 1
+
+    printf "initialize application\n"
+    pushd "$path" || die "cannot switch to $path"
+    init "$env"
+    popd || die "something wrong with paths"
 }
 
 while read -r _ _ ref; do
     case $ref in
-    refs/heads/master) deploy ../production master;;
-    refs/heads/develop) deploy ../staging develop;;
+    refs/heads/master) deploy master ../production production;;
+    refs/heads/develop) deploy develop ../staging staging;;
     esac
 done
-
-
