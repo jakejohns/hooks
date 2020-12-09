@@ -14,7 +14,7 @@ init() {
         source .env
     fi
 
-    make ENV="$env"
+    [ -f Makefile ] && make ENV="$env"
 }
 
 deploy() {
