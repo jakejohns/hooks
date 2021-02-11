@@ -33,7 +33,8 @@ deploy() {
 
 while read -r _ _ ref; do
     case $ref in
-    refs/heads/master) deploy master ../production production;;
+    refs/heads/master)  deploy master  ../production production;;
+    refs/heads/main)    deploy main    ../production production;;
     refs/heads/develop) deploy develop ../staging staging;;
     esac
 done
