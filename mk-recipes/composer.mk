@@ -10,7 +10,7 @@ download_new       ?= curl --silent --remote-time --output $(2) --time-cond $(2)
 composer_ansi_opt    ?= --no-ansi
 composer_install_opt ?= --no-dev \
 		--no-interaction --no-plugins --no-progress \
-		--no-scripts --no-suggest --optimize-autoloader
+		--no-scripts --optimize-autoloader
 
 vendor : $(composer) composer.lock
 	$(php) $(composer) $(composer_ansi_opt) validate
